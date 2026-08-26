@@ -25,9 +25,10 @@ The goal is basically to keep going and beat your previous best run.
 ## Built With
 
 * Google AI Studio
-* HTML
-* CSS
-* JavaScript
+* React & TypeScript
+* Three.js (3D Graphics)
+* Tailwind CSS
+* Vite
 
 ## Current Status
 
