@@ -5,7 +5,7 @@ import { PlayerProgress, CharacterConfig } from '../game/types';
 import { CHARACTERS } from '../game/constants';
 import { calculateLevel } from '../game/storage';
 import { audio } from '../game/audio';
-import { Play, Users, Zap, Award, Gift, Settings as SettingsIcon, Trophy, Coins, ChevronRight } from 'lucide-react';
+import { Play, Users, Zap, Award, Gift, Settings as SettingsIcon, Trophy, Coins, ChevronRight, Download, Smartphone } from 'lucide-react';
 
 interface MainMenuProps {
   progress: PlayerProgress;
@@ -15,6 +15,8 @@ interface MainMenuProps {
   onOpenMissions: () => void;
   onOpenDailyRewards: () => void;
   onOpenSettings: () => void;
+  onOpenInstall?: () => void;
+  isStandalone?: boolean;
   dailyRewardAvailable: boolean;
   unclaimedMissionsCount: number;
 }
@@ -27,6 +29,8 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   onOpenMissions,
   onOpenDailyRewards,
   onOpenSettings,
+  onOpenInstall,
+  isStandalone = false,
   dailyRewardAvailable,
   unclaimedMissionsCount,
 }) => {
@@ -82,7 +86,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
     const character = new PlayerCharacter(selectedChar);
     scene.add(character.group);
 
-    // Mouse drag rotation
+    // Mouse & Touch drag rotation
     let isDragging = false;
     let prevMouseX = 0;
     let rotationVelocity = 0.005;
@@ -101,9 +105,29 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       isDragging = false;
     };
 
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        isDragging = true;
+        prevMouseX = e.touches[0].clientX;
+      }
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (!isDragging || e.touches.length === 0) return;
+      const dx = e.touches[0].clientX - prevMouseX;
+      character.group.rotation.y += dx * 0.01;
+      prevMouseX = e.touches[0].clientX;
+    };
+    const onTouchEnd = () => {
+      isDragging = false;
+    };
+
     container.addEventListener('mousedown', onMouseDown);
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
+
+    container.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onTouchEnd, { passive: true });
 
     let animId: number;
     let clock = new THREE.Clock();
@@ -136,6 +160,9 @@ export const MainMenu: React.FC<MainMenuProps> = ({
       container.removeEventListener('mousedown', onMouseDown);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
+      container.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
       if (renderer.domElement.parentElement) {
         renderer.domElement.parentElement.removeChild(renderer.domElement);
       }
@@ -144,32 +171,32 @@ export const MainMenu: React.FC<MainMenuProps> = ({
   }, [selectedChar]);
 
   return (
-    <div id="main-menu-screen" className="relative w-full h-full flex flex-col justify-between bg-slate-950 text-slate-100 overflow-hidden font-sans select-none">
+    <div id="main-menu-screen" className="relative w-full h-full h-[100dvh] flex flex-col justify-between bg-slate-950 text-slate-100 overflow-y-auto overflow-x-hidden font-sans select-none safe-pt safe-pb safe-px">
       {/* Background City Glow Elements */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-950/40 via-slate-950 to-slate-950 pointer-events-none" />
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-950/40 via-slate-950 to-slate-950 pointer-events-none" />
 
       {/* Top Header Navigation */}
-      <header className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-8 py-5 flex items-center justify-between">
+      <header className="relative z-10 w-full max-w-7xl mx-auto py-3 sm:py-5 flex items-center justify-between gap-2">
         {/* Brand Title */}
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center font-black text-slate-950 text-xl font-mono shadow-lg shadow-cyan-500/20">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center font-black text-slate-950 text-lg sm:text-xl font-mono shadow-lg shadow-cyan-500/20 shrink-0">
             R
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black tracking-wider uppercase font-mono bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-cyan-400">
+            <h1 className="text-lg sm:text-2xl font-black tracking-wider uppercase font-mono bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-cyan-400">
               ONE MORE RUN
             </h1>
-            <p className="text-[11px] text-slate-400 font-medium tracking-wide">
-              Survive the Dynamic City Rush
+            <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium tracking-wide">
+              Dynamic City Rush
             </p>
           </div>
         </div>
 
         {/* Player Stats Pills */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Level Badge */}
-          <div className="flex items-center gap-2 bg-slate-900/90 border border-slate-700/80 rounded-2xl px-3.5 py-1.5 shadow-lg">
-            <div className="w-6 h-6 rounded-lg bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300 font-bold text-xs font-mono">
+          <div className="flex items-center gap-1.5 sm:gap-2 bg-slate-900/90 border border-slate-700/80 rounded-2xl px-2.5 sm:px-3.5 py-1.5 shadow-lg">
+            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300 font-bold text-[11px] sm:text-xs font-mono">
               {levelInfo.level}
             </div>
             <div className="hidden sm:block text-left">
@@ -179,12 +206,28 @@ export const MainMenu: React.FC<MainMenuProps> = ({
           </div>
 
           {/* Coins Counter */}
-          <div className="flex items-center gap-2 bg-slate-900/90 border border-amber-500/40 rounded-2xl px-4 py-1.5 shadow-lg">
-            <Coins className="w-4 h-4 text-amber-400 fill-amber-400" />
-            <span className="text-sm sm:text-base font-black text-amber-300 font-mono">
+          <div className="flex items-center gap-1.5 sm:gap-2 bg-slate-900/90 border border-amber-500/40 rounded-2xl px-2.5 sm:px-4 py-1.5 shadow-lg">
+            <Coins className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 fill-amber-400 shrink-0" />
+            <span className="text-xs sm:text-base font-black text-amber-300 font-mono">
               {progress.coins.toLocaleString()}
             </span>
           </div>
+
+          {/* Android / PWA Install Button */}
+          {onOpenInstall && !isStandalone && (
+            <button
+              id="btn-menu-install-app"
+              onClick={() => {
+                audio.playButtonClick();
+                onOpenInstall();
+              }}
+              className="flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-2xl bg-gradient-to-r from-cyan-500/20 to-blue-500/20 hover:from-cyan-500/30 hover:to-blue-500/30 border border-cyan-400/40 text-cyan-300 hover:text-white shadow-lg transition-all cursor-pointer shrink-0 font-mono text-xs font-bold"
+              title="Install Android App"
+            >
+              <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400" />
+              <span className="hidden sm:inline">INSTALL</span>
+            </button>
+          )}
 
           {/* Settings Button */}
           <button
@@ -193,33 +236,33 @@ export const MainMenu: React.FC<MainMenuProps> = ({
               audio.playButtonClick();
               onOpenSettings();
             }}
-            className="w-10 h-10 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 flex items-center justify-center text-slate-300 hover:text-white shadow-lg transition-colors cursor-pointer"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 flex items-center justify-center text-slate-300 hover:text-white shadow-lg transition-colors cursor-pointer shrink-0"
             title="Settings"
           >
-            <SettingsIcon className="w-5 h-5" />
+            <SettingsIcon className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-8 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+      <main className="relative z-10 w-full max-w-7xl mx-auto my-auto py-2 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-center">
         {/* Left Col: High Scores & Quick Actions */}
-        <div className="lg:col-span-4 space-y-4">
+        <div className="lg:col-span-4 space-y-3 sm:space-y-4">
           {/* Best Record Card */}
-          <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-3xl p-5 shadow-xl">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-3">
+          <div className="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-3xl p-4 sm:p-5 shadow-xl">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-400 mb-2 sm:mb-3">
               <Trophy className="w-4 h-4" /> Personal Best
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <div className="text-[11px] text-slate-400 uppercase font-semibold">High Score</div>
-                <div className="text-2xl font-black text-white font-mono">
+                <div className="text-[10px] sm:text-[11px] text-slate-400 uppercase font-semibold">High Score</div>
+                <div className="text-xl sm:text-2xl font-black text-white font-mono">
                   {progress.highScore.toLocaleString()}
                 </div>
               </div>
               <div>
-                <div className="text-[11px] text-slate-400 uppercase font-semibold">Best Distance</div>
-                <div className="text-2xl font-black text-cyan-400 font-mono">
+                <div className="text-[10px] sm:text-[11px] text-slate-400 uppercase font-semibold">Best Distance</div>
+                <div className="text-xl sm:text-2xl font-black text-cyan-400 font-mono">
                   {progress.bestDistance.toLocaleString()}<span className="text-xs text-slate-400 ml-0.5">m</span>
                 </div>
               </div>
@@ -232,29 +275,29 @@ export const MainMenu: React.FC<MainMenuProps> = ({
               audio.playButtonClick();
               onOpenCharacters();
             }}
-            className="bg-slate-900/80 hover:bg-slate-850 backdrop-blur-md border border-slate-800 hover:border-slate-700 rounded-3xl p-4 shadow-xl flex items-center justify-between cursor-pointer transition-all group"
+            className="bg-slate-900/80 hover:bg-slate-850 backdrop-blur-md border border-slate-800 hover:border-slate-700 rounded-3xl p-3.5 sm:p-4 shadow-xl flex items-center justify-between cursor-pointer transition-all group"
           >
             <div className="flex items-center gap-3">
               <div
-                className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-slate-950 text-xl font-mono shadow-md"
+                className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center font-black text-slate-950 text-lg sm:text-xl font-mono shadow-md shrink-0"
                 style={{ backgroundColor: selectedChar.colorScheme.primary }}
               >
                 {selectedChar.name[0]}
               </div>
               <div>
-                <div className="text-xs text-slate-400 uppercase font-bold tracking-wider">Runner</div>
-                <div className="text-base font-black text-white font-mono group-hover:text-cyan-400 transition-colors">
+                <div className="text-[10px] sm:text-xs text-slate-400 uppercase font-bold tracking-wider">Runner</div>
+                <div className="text-sm sm:text-base font-black text-white font-mono group-hover:text-cyan-400 transition-colors">
                   {selectedChar.name}
                 </div>
-                <div className="text-xs text-cyan-300/90">{selectedChar.perk.name}</div>
+                <div className="text-[11px] sm:text-xs text-cyan-300/90">{selectedChar.perk.name}</div>
               </div>
             </div>
-            <div className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-white transition-colors">
+            <div className="w-8 h-8 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-white transition-colors shrink-0">
               <ChevronRight className="w-5 h-5" />
             </div>
           </div>
 
-          {/* Pace System Feature Teaser */}
+          {/* Pace System Feature Teaser (Hidden on very small screens to maintain compact view) */}
           <div className="hidden sm:block p-4 rounded-3xl bg-slate-900/50 border border-slate-800/80 text-xs text-slate-400">
             <div className="font-bold text-slate-300 mb-1 flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5 text-amber-400" /> Dynamic Pace System
@@ -265,15 +308,15 @@ export const MainMenu: React.FC<MainMenuProps> = ({
         </div>
 
         {/* Center: 3D Character Stage */}
-        <div className="lg:col-span-4 h-72 sm:h-96 lg:h-[460px] relative flex items-center justify-center">
+        <div className="lg:col-span-4 h-48 sm:h-64 lg:h-[440px] relative flex items-center justify-center">
           <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
-          <div className="absolute bottom-2 text-[11px] text-slate-500 font-medium tracking-wide pointer-events-none">
+          <div className="absolute bottom-1 text-[10px] sm:text-[11px] text-slate-500 font-medium tracking-wide pointer-events-none bg-slate-950/60 px-2 py-0.5 rounded-full">
             Drag to inspect runner
           </div>
         </div>
 
         {/* Right Col: Menu Hub Actions */}
-        <div className="lg:col-span-4 space-y-3">
+        <div className="lg:col-span-4 space-y-2.5 sm:space-y-3">
           {/* CHARACTERS */}
           <button
             id="btn-menu-characters"
@@ -281,18 +324,18 @@ export const MainMenu: React.FC<MainMenuProps> = ({
               audio.playButtonClick();
               onOpenCharacters();
             }}
-            className="w-full p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-cyan-500/40 text-left flex items-center justify-between transition-all group cursor-pointer"
+            className="w-full p-3 sm:p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-cyan-500/40 text-left flex items-center justify-between transition-all group cursor-pointer"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
-                <Users className="w-5 h-5" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center shrink-0">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div>
-                <div className="text-sm font-bold text-white group-hover:text-cyan-300 font-mono">CHARACTERS</div>
-                <div className="text-xs text-slate-400">4 Stylized Runners with unique perks</div>
+                <div className="text-xs sm:text-sm font-bold text-white group-hover:text-cyan-300 font-mono">CHARACTERS</div>
+                <div className="text-[11px] sm:text-xs text-slate-400">4 Stylized Runners with unique perks</div>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-cyan-400 transition-colors" />
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500 group-hover:text-cyan-400 transition-colors" />
           </button>
 
           {/* UPGRADES */}
@@ -302,18 +345,18 @@ export const MainMenu: React.FC<MainMenuProps> = ({
               audio.playButtonClick();
               onOpenUpgrades();
             }}
-            className="w-full p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-amber-500/40 text-left flex items-center justify-between transition-all group cursor-pointer"
+            className="w-full p-3 sm:p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-amber-500/40 text-left flex items-center justify-between transition-all group cursor-pointer"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
-                <Zap className="w-5 h-5" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center shrink-0">
+                <Zap className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div>
-                <div className="text-sm font-bold text-white group-hover:text-amber-300 font-mono">UPGRADES</div>
-                <div className="text-xs text-slate-400">Magnet, Shield, Sonic Dash, Slow-Mo</div>
+                <div className="text-xs sm:text-sm font-bold text-white group-hover:text-amber-300 font-mono">UPGRADES</div>
+                <div className="text-[11px] sm:text-xs text-slate-400">Magnet, Shield, Sonic Dash, Slow-Mo</div>
               </div>
             </div>
-            <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-amber-400 transition-colors" />
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500 group-hover:text-amber-400 transition-colors" />
           </button>
 
           {/* MISSIONS */}
@@ -323,15 +366,15 @@ export const MainMenu: React.FC<MainMenuProps> = ({
               audio.playButtonClick();
               onOpenMissions();
             }}
-            className="w-full p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/40 text-left flex items-center justify-between transition-all group cursor-pointer relative"
+            className="w-full p-3 sm:p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-500/40 text-left flex items-center justify-between transition-all group cursor-pointer relative"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                <Award className="w-5 h-5" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shrink-0">
+                <Award className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div>
-                <div className="text-sm font-bold text-white group-hover:text-emerald-300 font-mono">MISSIONS</div>
-                <div className="text-xs text-slate-400">Earn extra XP and coin bounties</div>
+                <div className="text-xs sm:text-sm font-bold text-white group-hover:text-emerald-300 font-mono">MISSIONS</div>
+                <div className="text-[11px] sm:text-xs text-slate-400">Earn extra XP and coin bounties</div>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -340,7 +383,7 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                   {unclaimedMissionsCount}
                 </span>
               )}
-              <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-emerald-400 transition-colors" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500 group-hover:text-emerald-400 transition-colors" />
             </div>
           </button>
 
@@ -351,15 +394,15 @@ export const MainMenu: React.FC<MainMenuProps> = ({
               audio.playButtonClick();
               onOpenDailyRewards();
             }}
-            className="w-full p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-purple-500/40 text-left flex items-center justify-between transition-all group cursor-pointer relative"
+            className="w-full p-3 sm:p-4 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-purple-500/40 text-left flex items-center justify-between transition-all group cursor-pointer relative"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
-                <Gift className="w-5 h-5" />
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center shrink-0">
+                <Gift className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div>
-                <div className="text-sm font-bold text-white group-hover:text-purple-300 font-mono">DAILY REWARDS</div>
-                <div className="text-xs text-slate-400">7-Day Streak Calendar</div>
+                <div className="text-xs sm:text-sm font-bold text-white group-hover:text-purple-300 font-mono">DAILY REWARDS</div>
+                <div className="text-[11px] sm:text-xs text-slate-400">7-Day Streak Calendar</div>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -368,23 +411,23 @@ export const MainMenu: React.FC<MainMenuProps> = ({
                   Ready!
                 </span>
               )}
-              <ChevronRight className="w-5 h-5 text-slate-500 group-hover:text-purple-400 transition-colors" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500 group-hover:text-purple-400 transition-colors" />
             </div>
           </button>
         </div>
       </main>
 
       {/* Bottom Sticky Play Bar */}
-      <footer className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-8 py-5 flex items-center justify-center">
+      <footer className="relative z-10 w-full max-w-7xl mx-auto py-3 sm:py-5 flex items-center justify-center">
         <button
           id="btn-menu-play"
           onClick={() => {
             audio.playButtonClick();
             onPlay();
           }}
-          className="w-full max-w-md py-4 px-8 rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-slate-950 font-black text-xl sm:text-2xl tracking-wider uppercase font-mono shadow-2xl shadow-cyan-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-3 cursor-pointer"
+          className="w-full max-w-md py-3.5 sm:py-4 px-6 sm:px-8 rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-slate-950 font-black text-lg sm:text-2xl tracking-wider uppercase font-mono shadow-2xl shadow-cyan-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-3 cursor-pointer"
         >
-          <Play className="w-7 h-7 fill-slate-950" />
+          <Play className="w-6 h-6 sm:w-7 sm:h-7 fill-slate-950" />
           <span>START RUN</span>
         </button>
       </footer>

@@ -28,17 +28,17 @@ export const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
   };
 
   return (
-    <div id="daily-rewards-modal" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in font-sans">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col overflow-hidden">
+    <div id="daily-rewards-modal" className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in font-sans safe-pt safe-pb safe-px">
+      <div className="relative w-full max-w-2xl max-h-[92dvh] bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-8 shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300">
-              <Gift className="w-5 h-5" />
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-800 gap-2">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300 shrink-0">
+              <Gift className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h2 className="text-2xl font-black text-white font-mono">DAILY REWARDS</h2>
-              <p className="text-xs text-slate-400">Log in daily to build your streak and unlock mega chests</p>
+              <h2 className="text-xl sm:text-2xl font-black text-white font-mono">DAILY REWARDS</h2>
+              <p className="text-[11px] sm:text-xs text-slate-400">Log in daily to build streak rewards</p>
             </div>
           </div>
           <button
@@ -47,14 +47,14 @@ export const DailyRewardsModal: React.FC<DailyRewardsModalProps> = ({
               audio.playButtonClick();
               onClose();
             }}
-            className="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
         {/* 7-Day Grid */}
-        <div className="py-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="flex-1 overflow-y-auto py-4 sm:py-6 grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
           {DAILY_REWARDS.map((reward, index) => {
             const dayNum = reward.day;
             const isClaimed = !available && dayNum <= currentStreak;

@@ -152,92 +152,115 @@ export const HUD: React.FC<HUDProps> = ({
       <canvas ref={speedLinesCanvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
 
       {/* Top HUD Bar */}
-      <div className="relative z-10 w-full px-4 pt-4 sm:px-6 flex items-center justify-between pointer-events-auto">
-        {/* Left: Distance & Coins */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-md border border-slate-700/60 rounded-xl px-3.5 py-1.5 shadow-lg">
-            <Navigation className="w-4 h-4 text-cyan-400" />
-            <span className="text-sm sm:text-base font-black tracking-wider text-slate-100 font-mono">
-              {stats.distance.toLocaleString()}<span className="text-xs text-slate-400 font-normal ml-0.5">m</span>
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2 bg-slate-900/80 backdrop-blur-md border border-amber-500/40 rounded-xl px-3.5 py-1.5 shadow-lg">
-            <Coins className="w-4 h-4 text-amber-400 fill-amber-400" />
-            <span className="text-sm sm:text-base font-black tracking-wider text-amber-300 font-mono">
-              {stats.coinsCollected.toLocaleString()}
-            </span>
-          </div>
-        </div>
-
-        {/* Center: Dynamic Pace Badge */}
-        <div className="flex flex-col items-center">
-          <div
-            className="flex items-center gap-2 px-4 py-1.5 rounded-full border shadow-lg backdrop-blur-md transition-all duration-300"
-            style={{
-              borderColor: paceCfg.color,
-              backgroundColor: 'rgba(15, 23, 42, 0.85)',
-              boxShadow: `0 0 16px ${paceCfg.color}40`,
-            }}
-          >
-            <span
-              className="w-2.5 h-2.5 rounded-full animate-ping"
-              style={{ backgroundColor: paceCfg.color }}
-            />
-            <span className="text-xs sm:text-sm font-black tracking-widest uppercase font-mono" style={{ color: paceCfg.color }}>
-              {paceCfg.name}
-            </span>
-            <span className="text-[11px] text-slate-400 font-mono">
-              {Math.ceil(stats.paceTimeRemaining)}s
-            </span>
-          </div>
-        </div>
-
-        {/* Right: Score & Pause */}
-        <div className="flex items-center gap-3">
-          {/* Combo Multiplier Flame */}
-          {stats.combo > 1 && (
-            <div className="flex items-center gap-1.5 bg-gradient-to-r from-orange-600 to-amber-600 border border-orange-400 rounded-xl px-3 py-1.5 text-white font-black text-xs sm:text-sm shadow-lg animate-pulse font-mono">
-              <Flame className="w-4 h-4 fill-white" />
-              <span>x{stats.combo}</span>
+      <div className="relative z-10 w-full px-3 pt-3 sm:px-6 sm:pt-4 flex flex-col gap-2 pointer-events-auto safe-pt safe-px">
+        <div className="w-full flex items-center justify-between gap-2">
+          {/* Left: Distance & Coins */}
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-slate-900/85 backdrop-blur-md border border-slate-700/60 rounded-xl px-2.5 sm:px-3.5 py-1.5 shadow-lg">
+              <Navigation className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-cyan-400 shrink-0" />
+              <span className="text-xs sm:text-base font-black tracking-wider text-slate-100 font-mono">
+                {stats.distance.toLocaleString()}<span className="text-[10px] sm:text-xs text-slate-400 font-normal ml-0.5">m</span>
+              </span>
             </div>
-          )}
 
-          {/* Score Counter */}
-          <div className="bg-slate-900/80 backdrop-blur-md border border-slate-700/60 rounded-xl px-4 py-1.5 shadow-lg text-right">
-            <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
-            <div className="text-sm sm:text-lg font-black text-white font-mono tracking-wide">
-              {stats.score.toLocaleString()}
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-slate-900/85 backdrop-blur-md border border-amber-500/40 rounded-xl px-2.5 sm:px-3.5 py-1.5 shadow-lg">
+              <Coins className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 fill-amber-400 shrink-0" />
+              <span className="text-xs sm:text-base font-black tracking-wider text-amber-300 font-mono">
+                {stats.coinsCollected.toLocaleString()}
+              </span>
             </div>
           </div>
 
-          {/* Pause Button */}
-          <button
-            id="btn-hud-pause"
-            onClick={onPause}
-            className="w-10 h-10 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-700/60 flex items-center justify-center text-slate-200 hover:text-white shadow-lg transition-colors cursor-pointer"
-            title="Pause Game (ESC)"
-          >
-            <Pause className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-
-      {/* Active Power-Ups Tray */}
-      <div className="relative z-10 w-full px-4 sm:px-6 mt-3 flex items-center justify-start gap-2">
-        {(Object.keys(stats.activePowerUps) as PowerUpType[]).map(type => {
-          const timeLeft = stats.activePowerUps[type];
-          if (timeLeft <= 0) return null;
-          return (
+          {/* Center (Desktop): Dynamic Pace Badge */}
+          <div className="hidden md:flex flex-col items-center">
             <div
-              key={type}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border backdrop-blur-md text-xs font-bold font-mono shadow-md animate-fade-in ${powerUpColors[type]}`}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full border shadow-lg backdrop-blur-md transition-all duration-300"
+              style={{
+                borderColor: paceCfg.color,
+                backgroundColor: 'rgba(15, 23, 42, 0.85)',
+                boxShadow: `0 0 16px ${paceCfg.color}40`,
+              }}
             >
-              {powerUpIcons[type]}
-              <span>{Math.ceil(timeLeft)}s</span>
+              <span
+                className="w-2.5 h-2.5 rounded-full animate-ping"
+                style={{ backgroundColor: paceCfg.color }}
+              />
+              <span className="text-xs sm:text-sm font-black tracking-widest uppercase font-mono" style={{ color: paceCfg.color }}>
+                {paceCfg.name}
+              </span>
+              <span className="text-[11px] text-slate-400 font-mono">
+                {Math.ceil(stats.paceTimeRemaining)}s
+              </span>
             </div>
-          );
-        })}
+          </div>
+
+          {/* Right: Combo, Score & Pause */}
+          <div className="flex items-center gap-1.5 sm:gap-3">
+            {/* Combo Multiplier Flame */}
+            {stats.combo > 1 && (
+              <div className="flex items-center gap-1 bg-gradient-to-r from-orange-600 to-amber-600 border border-orange-400 rounded-xl px-2 sm:px-3 py-1 sm:py-1.5 text-white font-black text-xs sm:text-sm shadow-lg animate-pulse font-mono shrink-0">
+                <Flame className="w-3.5 h-3.5 fill-white shrink-0" />
+                <span>x{stats.combo}</span>
+              </div>
+            )}
+
+            {/* Score Counter */}
+            <div className="bg-slate-900/85 backdrop-blur-md border border-slate-700/60 rounded-xl px-3 sm:px-4 py-1 sm:py-1.5 shadow-lg text-right">
+              <div className="text-[9px] sm:text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</div>
+              <div className="text-xs sm:text-lg font-black text-white font-mono tracking-wide">
+                {stats.score.toLocaleString()}
+              </div>
+            </div>
+
+            {/* Pause Button */}
+            <button
+              id="btn-hud-pause"
+              onClick={onPause}
+              className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-slate-900/85 hover:bg-slate-800 border border-slate-700/60 flex items-center justify-center text-slate-200 hover:text-white shadow-lg transition-colors cursor-pointer shrink-0"
+              title="Pause Game (ESC)"
+            >
+              <Pause className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Pace Badge & Power-Up Row */}
+        <div className="w-full flex items-center justify-between gap-2">
+          {/* Mobile Pace Pill */}
+          <div className="flex md:hidden items-center">
+            <div
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border shadow backdrop-blur-md text-[11px] font-black font-mono uppercase"
+              style={{
+                borderColor: paceCfg.color,
+                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                color: paceCfg.color,
+              }}
+            >
+              <span className="w-2 h-2 rounded-full animate-ping" style={{ backgroundColor: paceCfg.color }} />
+              <span>{paceCfg.name}</span>
+              <span className="text-[10px] text-slate-400 lowercase font-normal">
+                {Math.ceil(stats.paceTimeRemaining)}s
+              </span>
+            </div>
+          </div>
+
+          {/* Active Power-Ups Tray */}
+          <div className="flex items-center gap-1.5 flex-wrap justify-end">
+            {(Object.keys(stats.activePowerUps) as PowerUpType[]).map(type => {
+              const timeLeft = stats.activePowerUps[type];
+              if (timeLeft <= 0) return null;
+              return (
+                <div
+                  key={type}
+                  className={`flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg border backdrop-blur-md text-[10px] sm:text-xs font-bold font-mono shadow-md animate-fade-in ${powerUpColors[type]}`}
+                >
+                  {powerUpIcons[type]}
+                  <span>{Math.ceil(timeLeft)}s</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
       {/* Floating Action Popups */}
@@ -279,20 +302,30 @@ export const HUD: React.FC<HUDProps> = ({
 
       {/* Mobile / On-Screen Touch Controls (if enabled) */}
       {showTouchControls && (
-        <div className="absolute bottom-6 inset-x-0 px-6 flex items-end justify-between pointer-events-auto z-20">
+        <div className="absolute bottom-6 pb-[env(safe-area-inset-bottom,0px)] inset-x-0 px-4 sm:px-6 flex items-end justify-between pointer-events-auto z-20 select-none">
           {/* Left / Right Lateral D-Pad */}
           <div className="flex items-center gap-3">
             <button
               id="touch-btn-left"
               onClick={onMoveLeft}
-              className="w-16 h-16 rounded-2xl bg-slate-900/80 active:bg-cyan-600 border border-slate-700 text-white font-black text-xl flex items-center justify-center shadow-xl active:scale-95 transition-transform"
+              onTouchStart={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onMoveLeft();
+              }}
+              className="w-16 h-16 rounded-2xl bg-slate-900/85 active:bg-cyan-600 border border-slate-700/80 text-white font-black text-xl flex items-center justify-center shadow-xl active:scale-90 transition-transform cursor-pointer touch-manipulation"
             >
               ◀
             </button>
             <button
               id="touch-btn-right"
               onClick={onMoveRight}
-              className="w-16 h-16 rounded-2xl bg-slate-900/80 active:bg-cyan-600 border border-slate-700 text-white font-black text-xl flex items-center justify-center shadow-xl active:scale-95 transition-transform"
+              onTouchStart={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onMoveRight();
+              }}
+              className="w-16 h-16 rounded-2xl bg-slate-900/85 active:bg-cyan-600 border border-slate-700/80 text-white font-black text-xl flex items-center justify-center shadow-xl active:scale-90 transition-transform cursor-pointer touch-manipulation"
             >
               ▶
             </button>
@@ -303,7 +336,12 @@ export const HUD: React.FC<HUDProps> = ({
             <button
               id="touch-btn-slide"
               onClick={onSlide}
-              className="w-16 h-16 rounded-2xl bg-slate-900/80 active:bg-amber-600 border border-slate-700 text-amber-300 font-black text-xs uppercase flex flex-col items-center justify-center shadow-xl active:scale-95 transition-transform"
+              onTouchStart={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onSlide();
+              }}
+              className="w-16 h-16 rounded-2xl bg-slate-900/85 active:bg-amber-600 border border-slate-700/80 text-amber-300 font-black text-xs uppercase flex flex-col items-center justify-center shadow-xl active:scale-90 transition-transform cursor-pointer touch-manipulation"
             >
               <span className="text-lg">▼</span>
               <span>Slide</span>
@@ -311,7 +349,12 @@ export const HUD: React.FC<HUDProps> = ({
             <button
               id="touch-btn-jump"
               onClick={onJump}
-              className="w-16 h-16 rounded-2xl bg-cyan-600 active:bg-cyan-500 border border-cyan-400 text-white font-black text-xs uppercase flex flex-col items-center justify-center shadow-xl active:scale-95 transition-transform"
+              onTouchStart={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onJump();
+              }}
+              className="w-16 h-16 rounded-2xl bg-cyan-600 active:bg-cyan-500 border border-cyan-400 text-white font-black text-xs uppercase flex flex-col items-center justify-center shadow-xl active:scale-90 transition-transform cursor-pointer touch-manipulation"
             >
               <span className="text-lg">▲</span>
               <span>Jump</span>

@@ -16,8 +16,8 @@ export const PauseModal: React.FC<PauseModalProps> = ({
   onMainMenu,
 }) => {
   return (
-    <div id="pause-modal" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in font-sans">
-      <div className="relative w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-center">
+    <div id="pause-modal" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in font-sans safe-pt safe-pb safe-px">
+      <div className="relative w-full max-w-sm max-h-[92dvh] overflow-y-auto bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-center">
         <h2 className="text-3xl font-black text-white font-mono tracking-wider mb-1">
           PAUSED
         </h2>

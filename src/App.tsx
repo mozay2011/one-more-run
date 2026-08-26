@@ -31,6 +31,7 @@ import { MissionsModal } from './components/MissionsModal';
 import { DailyRewardsModal } from './components/DailyRewardsModal';
 import { SettingsModal } from './components/SettingsModal';
 import { PauseModal } from './components/PauseModal';
+import { InstallModal } from './components/InstallModal';
 
 type AppState = 'MENU' | 'PLAYING' | 'GAMEOVER';
 
@@ -45,7 +46,36 @@ export default function App() {
   const [showMissions, setShowMissions] = useState(false);
   const [showDailyRewards, setShowDailyRewards] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showInstall, setShowInstall] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+
+  // Android / PWA Install State
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setDeferredPrompt(null);
+      setIsStandalone(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    const checkStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true;
+    setIsStandalone(checkStandalone);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
 
   // Run Stats
   const [stats, setStats] = useState<GameStats>({
@@ -303,7 +333,7 @@ export default function App() {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-slate-950 text-white select-none">
+    <div className="relative w-full h-full h-[100dvh] fixed inset-0 overflow-hidden bg-slate-950 text-white select-none">
       {/* 3D Game Canvas Container */}
       <div
         ref={gameContainerRef}
@@ -320,6 +350,8 @@ export default function App() {
           onOpenMissions={() => setShowMissions(true)}
           onOpenDailyRewards={() => setShowDailyRewards(true)}
           onOpenSettings={() => setShowSettings(true)}
+          onOpenInstall={() => setShowInstall(true)}
+          isStandalone={isStandalone}
           dailyRewardAvailable={dailyCheck.available}
           unclaimedMissionsCount={unclaimedMissionsCount}
         />
@@ -429,7 +461,17 @@ export default function App() {
         <SettingsModal
           settings={settings}
           onUpdateSettings={setSettings}
+          onOpenInstall={() => setShowInstall(true)}
           onClose={() => setShowSettings(false)}
+        />
+      )}
+
+      {/* Android / PWA Installation Modal */}
+      {showInstall && (
+        <InstallModal
+          deferredPrompt={deferredPrompt}
+          isStandalone={isStandalone}
+          onClose={() => setShowInstall(false)}
         />
       )}
     </div>

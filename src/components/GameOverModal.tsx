@@ -49,17 +49,17 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
   }, [isNewHighScore, onOneMoreRun]);
 
   return (
-    <div id="game-over-modal" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in font-sans">
-      <div className="relative w-full max-w-lg bg-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden">
+    <div id="game-over-modal" className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-fade-in font-sans safe-pt safe-pb safe-px">
+      <div className="relative w-full max-w-lg max-h-[92dvh] bg-slate-900 border border-slate-700/80 rounded-3xl p-5 sm:p-8 shadow-2xl overflow-y-auto overflow-x-hidden">
         {/* Glow Header Accent */}
         <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-cyan-500 via-purple-500 to-amber-500" />
 
         {/* Title */}
-        <div className="text-center mb-5">
-          <div className="text-xs uppercase font-black tracking-widest text-slate-400 font-mono mb-1">
+        <div className="text-center mb-4 sm:mb-5">
+          <div className="text-[10px] sm:text-xs uppercase font-black tracking-widest text-slate-400 font-mono mb-1">
             End of Run
           </div>
-          <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-white font-mono">
+          <h2 className="text-2xl sm:text-4xl font-black tracking-tight text-white font-mono">
             RUN OVER
           </h2>
           {isNewHighScore && (

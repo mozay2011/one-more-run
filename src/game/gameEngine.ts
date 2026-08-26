@@ -4,6 +4,7 @@ import { TrackManager } from './track';
 import { PaceEngine } from './paceEngine';
 import { CameraFxManager, ParticleManager } from './cameraFx';
 import { audio } from './audio';
+import { haptics } from './haptics';
 import {
   CharacterConfig,
   GameSettings,
@@ -90,10 +91,13 @@ export class GameEngine {
   // Touch handling
   private touchStartX: number = 0;
   private touchStartY: number = 0;
+  private touchActive: boolean = false;
   private containerElement: HTMLElement | null = null;
   private onKeyDownHandler: ((e: KeyboardEvent) => void) | null = null;
   private onTouchStartHandler: ((e: TouchEvent) => void) | null = null;
+  private onTouchMoveHandler: ((e: TouchEvent) => void) | null = null;
   private onTouchEndHandler: ((e: TouchEvent) => void) | null = null;
+  private onTouchCancelHandler: ((e: TouchEvent) => void) | null = null;
 
   constructor(
     container: HTMLElement,
@@ -347,25 +351,26 @@ export class GameEngine {
 
     window.addEventListener('keydown', this.onKeyDownHandler);
 
-    // Touch / Swipe Gestures
+    // Touch / Swipe Gestures for Mobile & Android
     this.onTouchStartHandler = (e: TouchEvent) => {
       if (e.touches.length > 0) {
         this.touchStartX = e.touches[0].clientX;
         this.touchStartY = e.touches[0].clientY;
+        this.touchActive = true;
       }
     };
 
-    this.onTouchEndHandler = (e: TouchEvent) => {
-      if (this.isGameOver || this.isPaused || e.changedTouches.length === 0) return;
-      const touchEndX = e.changedTouches[0].clientX;
-      const touchEndY = e.changedTouches[0].clientY;
-
-      const dx = touchEndX - this.touchStartX;
-      const dy = touchEndY - this.touchStartY;
+    this.onTouchMoveHandler = (e: TouchEvent) => {
+      if (!this.touchActive || this.isGameOver || this.isPaused || e.touches.length === 0) return;
+      const curX = e.touches[0].clientX;
+      const curY = e.touches[0].clientY;
+      const dx = curX - this.touchStartX;
+      const dy = curY - this.touchStartY;
       const absDx = Math.abs(dx);
       const absDy = Math.abs(dy);
 
-      if (Math.max(absDx, absDy) > 22) {
+      const SWIPE_THRESHOLD = 20;
+      if (Math.max(absDx, absDy) >= SWIPE_THRESHOLD) {
         if (absDx > absDy) {
           if (dx > 0) this.moveRight();
           else this.moveLeft();
@@ -373,11 +378,45 @@ export class GameEngine {
           if (dy > 0) this.slide();
           else this.jump();
         }
+        this.touchStartX = curX;
+        this.touchStartY = curY;
       }
     };
 
-    container.addEventListener('touchstart', this.onTouchStartHandler, { passive: true });
-    container.addEventListener('touchend', this.onTouchEndHandler, { passive: true });
+    this.onTouchEndHandler = (e: TouchEvent) => {
+      if (this.isGameOver || this.isPaused || !this.touchActive) {
+        this.touchActive = false;
+        return;
+      }
+      if (e.changedTouches.length > 0) {
+        const curX = e.changedTouches[0].clientX;
+        const curY = e.changedTouches[0].clientY;
+        const dx = curX - this.touchStartX;
+        const dy = curY - this.touchStartY;
+        const absDx = Math.abs(dx);
+        const absDy = Math.abs(dy);
+
+        if (Math.max(absDx, absDy) >= 15) {
+          if (absDx > absDy) {
+            if (dx > 0) this.moveRight();
+            else this.moveLeft();
+          } else {
+            if (dy > 0) this.slide();
+            else this.jump();
+          }
+        }
+      }
+      this.touchActive = false;
+    };
+
+    this.onTouchCancelHandler = () => {
+      this.touchActive = false;
+    };
+
+    window.addEventListener('touchstart', this.onTouchStartHandler, { passive: true });
+    window.addEventListener('touchmove', this.onTouchMoveHandler, { passive: true });
+    window.addEventListener('touchend', this.onTouchEndHandler, { passive: true });
+    window.addEventListener('touchcancel', this.onTouchCancelHandler, { passive: true });
   }
 
   public moveLeft() {
@@ -386,6 +425,7 @@ export class GameEngine {
       this.targetX = this.currentLane === -1 ? LANE_X.LEFT : this.currentLane === 0 ? LANE_X.CENTER : LANE_X.RIGHT;
       this.character.laneChangeRoll = 1;
       audio.playLaneChange();
+      haptics.light();
     }
   }
 
@@ -395,6 +435,7 @@ export class GameEngine {
       this.targetX = this.currentLane === -1 ? LANE_X.LEFT : this.currentLane === 0 ? LANE_X.CENTER : LANE_X.RIGHT;
       this.character.laneChangeRoll = -1;
       audio.playLaneChange();
+      haptics.light();
     }
   }
 
@@ -406,6 +447,7 @@ export class GameEngine {
       // High lofty jump clearing up to 2.25m with clean visual parabola
       this.velocityY = 12.0 * Math.sqrt(floatBonus);
       audio.playJump();
+      haptics.light();
     }
   }
 
@@ -416,6 +458,7 @@ export class GameEngine {
     this.isSliding = true;
     this.slideTimer = 0.75;
     audio.playSlide();
+    haptics.light();
   }
 
   // ================= GAME LOOP =================
@@ -658,6 +701,7 @@ export class GameEngine {
           this.invulnerabilityTimer = 1.5;
           obs.cleared = true;
           audio.playShieldBreak();
+          haptics.medium();
           this.cameraFx.triggerShake(0.8);
           this.particles.spawnImpactBurst(pX, 1.2, pZ);
           if (this.onFloatingText) {
@@ -667,6 +711,7 @@ export class GameEngine {
         }
 
         // CRASH / RUN OVER
+        haptics.impact();
         this.triggerGameOver();
         return;
       }
@@ -775,6 +820,7 @@ export class GameEngine {
           this.maxCombo = Math.max(this.maxCombo, this.combo);
           this.comboDecayTimer = 6.0;
           audio.playCoin();
+          haptics.medium();
           if (this.onFloatingText) {
             this.onFloatingText('+10 SUPER COINS!', '#f43f5e');
           }
@@ -806,6 +852,7 @@ export class GameEngine {
     };
 
     audio.playPowerUp();
+    haptics.double();
     this.cameraFx.triggerShake(0.35);
     this.cameraFx.triggerPowerUpKick(type === 'SPEED_BOOST' ? 9.0 : 6.5);
     this.particles.spawnPowerUpBurst(this.playerX, 1.2, this.playerZ, hexColors[type] || 0xc084fc);
@@ -879,15 +926,21 @@ export class GameEngine {
       this.onKeyDownHandler = null;
     }
 
-    if (this.containerElement) {
-      if (this.onTouchStartHandler) {
-        this.containerElement.removeEventListener('touchstart', this.onTouchStartHandler);
-        this.onTouchStartHandler = null;
-      }
-      if (this.onTouchEndHandler) {
-        this.containerElement.removeEventListener('touchend', this.onTouchEndHandler);
-        this.onTouchEndHandler = null;
-      }
+    if (this.onTouchStartHandler) {
+      window.removeEventListener('touchstart', this.onTouchStartHandler);
+      this.onTouchStartHandler = null;
+    }
+    if (this.onTouchMoveHandler) {
+      window.removeEventListener('touchmove', this.onTouchMoveHandler);
+      this.onTouchMoveHandler = null;
+    }
+    if (this.onTouchEndHandler) {
+      window.removeEventListener('touchend', this.onTouchEndHandler);
+      this.onTouchEndHandler = null;
+    }
+    if (this.onTouchCancelHandler) {
+      window.removeEventListener('touchcancel', this.onTouchCancelHandler);
+      this.onTouchCancelHandler = null;
     }
 
     this.track.destroy();

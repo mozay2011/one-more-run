@@ -1,18 +1,20 @@
 import React from 'react';
 import { GameSettings } from '../game/types';
 import { audio } from '../game/audio';
-import { X, Volume2, VolumeX, Sparkles, Smartphone, Eye, RotateCcw, Keyboard } from 'lucide-react';
+import { X, Volume2, VolumeX, Sparkles, Smartphone, Eye, RotateCcw, Keyboard, Download } from 'lucide-react';
 
 interface SettingsModalProps {
   settings: GameSettings;
   onUpdateSettings: (newSettings: GameSettings) => void;
   onClose: () => void;
+  onOpenInstall?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   settings,
   onUpdateSettings,
   onClose,
+  onOpenInstall,
 }) => {
   const update = (patch: Partial<GameSettings>) => {
     const updated = { ...settings, ...patch };
@@ -20,13 +22,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   return (
-    <div id="settings-modal" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in font-sans">
-      <div className="relative w-full max-w-xl max-h-[90vh] bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col overflow-hidden">
+    <div id="settings-modal" className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in font-sans safe-pt safe-pb safe-px">
+      <div className="relative w-full max-w-xl max-h-[92dvh] bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-8 shadow-2xl flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-800 gap-2">
           <div>
-            <h2 className="text-2xl font-black text-white font-mono">SETTINGS</h2>
-            <p className="text-xs text-slate-400">Audio, graphics performance, and control preferences</p>
+            <h2 className="text-xl sm:text-2xl font-black text-white font-mono">SETTINGS</h2>
+            <p className="text-[11px] sm:text-xs text-slate-400">Audio, performance, and control preferences</p>
           </div>
           <button
             id="btn-close-settings"
@@ -34,14 +36,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               audio.playButtonClick();
               onClose();
             }}
-            className="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer shrink-0"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
         {/* Settings Body */}
-        <div className="flex-1 overflow-y-auto py-6 space-y-6 pr-1">
+        <div className="flex-1 overflow-y-auto py-4 sm:py-6 space-y-4 sm:space-y-6 pr-1">
           {/* Audio Controls */}
           <div className="space-y-4">
             <h3 className="text-xs font-bold uppercase tracking-wider text-cyan-400 font-mono">Audio Levels</h3>
@@ -184,6 +186,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </button>
             </div>
           </div>
+
+          {/* Android App / PWA Install */}
+          {onOpenInstall && (
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-cyan-950/40 to-blue-950/40 border border-cyan-500/30 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+                  <Smartphone className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-xs sm:text-sm font-bold text-white font-mono">INSTALL ON ANDROID</div>
+                  <div className="text-[11px] text-slate-400">Play fullscreen offline with zero lag</div>
+                </div>
+              </div>
+              <button
+                id="btn-settings-install-app"
+                onClick={() => {
+                  audio.playButtonClick();
+                  onOpenInstall();
+                }}
+                className="px-3 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs uppercase tracking-wider font-mono shadow-md flex items-center gap-1.5 cursor-pointer shrink-0 transition-colors"
+              >
+                <Download className="w-3.5 h-3.5 fill-slate-950" />
+                <span>INSTALL</span>
+              </button>
+            </div>
+          )}
 
           {/* Controls Quick Reference */}
           <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2 text-xs">

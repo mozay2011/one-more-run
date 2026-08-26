@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020617"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#082f49"/>
+    </linearGradient>
+    <linearGradient id="neonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="50%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#ef4444"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)"/>
+  <rect width="504" height="504" x="4" y="4" rx="108" fill="none" stroke="#38bdf8" stroke-opacity="0.3" stroke-width="6"/>
+
+  <!-- Speed Lines -->
+  <path d="M60 140 L200 140" stroke="#06b6d4" stroke-width="8" stroke-linecap="round" stroke-opacity="0.4"/>
+  <path d="M40 220 L160 220" stroke="#06b6d4" stroke-width="12" stroke-linecap="round" stroke-opacity="0.6"/>
+  <path d="M80 300 L220 300" stroke="#38bdf8" stroke-width="10" stroke-linecap="round" stroke-opacity="0.5"/>
+  <path d="M50 380 L180 380" stroke="#f59e0b" stroke-width="8" stroke-linecap="round" stroke-opacity="0.5"/>
+
+  <!-- Stylized Fast Runner 'R' Icon -->
+  <g filter="url(#glow)">
+    <circle cx="330" cy="130" r="45" fill="url(#neonGrad)"/>
+    <path d="M220 200 L300 200 C350 200 370 230 370 260 C370 290 340 315 300 315 L265 315 L350 430 L285 430 L210 325 L210 430 L160 430 L160 200 Z" fill="url(#neonGrad)"/>
+    <rect x="220" y="240" width="75" height="40" rx="8" fill="#020617"/>
+  </g>
+
+  <!-- Accent Energy Sparks -->
+  <polygon points="390,180 430,220 405,225 435,260 385,240 400,220" fill="url(#amberGrad)" filter="url(#glow)"/>
+</svg>
