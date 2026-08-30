@@ -1,0 +1,34 @@
+name: Build and Deploy to Itch.io
+
+on:
+  push:
+    branches:
+      - main  # Runs every time you update your code on GitHub
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Create Production Build via Vite
+        run: npm run build
+
+      - name: Deploy Compiled Files to Itch.io via Butler
+        uses: JosephMaynish/Butler-To-Itch@v1.0.0
+        with:
+          api-key: ${{ secrets.BUTLER_API_KEY }}
+          itch_user: Mozay2011       # <--- CHANGE THIS
+          itch_game: one-more-run     # <--- CHANGE THIS
+          package: ./dist                          
+          channel: html                            
