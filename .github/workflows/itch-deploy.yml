@@ -25,10 +25,9 @@ jobs:
         run: npm run build
 
       - name: Deploy Compiled Files to Itch.io via Butler
-        uses: JosephMaynish/Butler-To-Itch@v1.0.0
+        uses: Ayowel/butler-to-itch@v1.0.0
         with:
-          api-key: ${{ secrets.BUTLER_API_KEY }}
-          itch_user: Mozay2011       # <--- CHANGE THIS
-          itch_game: one-more-run     # <--- CHANGE THIS
-          package: ./dist                          
-          channel: html                            
+          butler_key: ${{ secrets.BUTLER_API_KEY }}
+          itch_user: mozay2011                  # <-- Keep your itch username here
+          itch_game: one-more-run        # <-- Remember to swap in your real itch game slug name!
+          files: ./dist
